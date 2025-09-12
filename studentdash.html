@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoVerse - Interactive Road Journey</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #90EE90 100%);
+            min-height: 100vh;
+            position: relative;
+            
+        }
+
+        /* Road Interface */
+        .road-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+             background: url('game forest.jpg') no-repeat center center;
+    background-size: cover;  
+        }
+
+        /* Animated Background Elements */
+        .background-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.8;
+            animation: cloudFloat 20s ease-in-out infinite;
+        }
+
+        .cloud1 {
+            width: 80px;
+            height: 30px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .cloud2 {
+            width: 60px;
+            height: 25px;
+            top: 20%;
+            right: 20%;
+            animation-delay: 5s;
+        }
+
+        .cloud3 {
+            width: 100px;
+            height: 35px;
+            top: 15%;
+            left: 60%;
+            animation-delay: 10s;
+        }
+
+        @keyframes cloudFloat {
+            0%, 100% { transform: translateX(0px) translateY(0px); }
+            33% { transform: translateX(20px) translateY(-10px); }
+            66% { transform: translateX(-15px) translateY(5px); }
+        }
+
+        /* Road Path */
+        .road-path {
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            transform: translateY(-50%);
+            width: 90%;
+            height: 400px;
+        }
+
+        .road-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Road Points */
+        .road-point {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 3px solid #4CAF50;
+        }
+
+        .road-point:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .road-point.locked {
+            background: #f0f0f0;
+            border-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .road-point.locked:hover {
+            transform: none;
+        }
+
+        .point-icon {
+            font-size: 2rem;
+        }
+
+        .point-label {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Positioning road points */
+        .point-1 { top: 60%; left: 8%; }
+        .point-2 { top: 40%; left: 25%; }
+        .point-3 { top: 20%; left: 45%; }
+        .point-4 { top: 30%; right: 25%; }
+        .point-5 { top: 50%; right: 8%; }
+
+        /* Dashboard Modal */
+        .dashboard-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: none;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .dashboard-content {
+    background: url('deep forest.jpg') no-repeat center center;
+    background-size: cover;   /* makes it fit nicely */
+    border-radius: 20px;
+    overflow-y: auto;
+}
+
+        @keyframes modalSlideIn {
+            from { transform: translate(-50%, -60%) scale(0.9); opacity: 0; }
+            to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        /* Original EcoVerse Styles (without green colors) */
+     :root {
+    --primary-color: #3a3434;
+    --secondary-color: #473838;
+    --accent-electric: #3593b3;
+    --accent-lime: #ffffff;
+    --accent-neon: #ffffff;
+    --text-dark: #333333;
+    --text-light: #5a2d2d;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --electric-glow: 0 0 20px #ffffff, 0 0 40px #ffffff, 0 0 60px #ffffff;
+}
+
+
+
+
+
+        /* Electric Animated Background */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(129, 199, 132, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 191, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #001a00 0%, #002200 50%, #003300 100%);
+            background-size: 300% 300%;
+            animation: electricFlow 15s ease infinite;
+        }
+
+        @keyframes electricFlow {
+            0%, 100% { 
+                background-position: 0% 50%; 
+                filter: hue-rotate(0deg) brightness(1);
+            }
+            33% { 
+                background-position: 100% 20%; 
+                filter: hue-rotate(30deg) brightness(1.2);
+            }
+            66% { 
+                background-position: 20% 100%; 
+                filter: hue-rotate(-30deg) brightness(0.9);
+            }
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            backdrop-filter: blur(10px);
+            padding-top: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            margin: 20px;
+            border-radius: 30px;
+            border: 2px solid var(--glass-border);
+            box-shadow: var(--electric-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.2) 0%, transparent 70%);
+            animation: headerGlow 10s ease-in-out infinite;
+        }
+
+        @keyframes headerGlow {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+
+       .logo {
+    font-size: 4rem;
+    font-weight: 900;
+    color: rgb(3, 1, 1);
+    text-shadow: 0 0 10px white;
+}
+
+
+
+        @keyframes logoShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .tagline {
+            font-size: 1.4rem;
+            color: var(black);
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+            text-shadow: 0 0 10px var(black);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 30px;
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border-radius: 25px;
+            border: 2px solid var(--glass-border);
+            padding: 35px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 25px 50px rgba(76, 175, 80, 0.2);
+            cursor: pointer;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(75, 169, 212, 0.3), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .glass-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(213, 226, 214, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: var(--electric-glow);
+            border-color: var(--primary-color);
+            background: rgba(53, 164, 192, 0.25);
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover::after {
+            opacity: 1;
+        }
+
+        /* Card Headers */
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin-right: 20px;
+            box-shadow: var(--electric-glow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--primary-color);
+        }
+
+        .card-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(76, 175, 80, 0.3), transparent);
+            animation: iconShine 3s ease-in-out infinite;
+        }
+        .card-icon.eco-score,
+.card-icon.carbon-footprint,
+.card-icon.achievements,
+.card-icon.challenges,
+.card-icon.eco-lens,
+.card-icon.leaderboard {
+    background: linear-gradient(135deg, #ffffff, #f0f0f0);
+}
+
+
+        @keyframes iconShine {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+
+        .eco-score { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); }
+        .carbon-footprint { background: linear-gradient(135deg, var(--accent-lime), var(--primary-color)); }
+        .achievements { background: linear-gradient(135deg, var(--accent-electric), var(--accent-lime)); }
+        .challenges { background: linear-gradient(135deg, var(--secondary-color), var(--accent-neon)); }
+        .eco-lens { background: linear-gradient(135deg, var(--accent-electric), var(--primary-color)); }
+        .leaderboard { background: linear-gradient(135deg, var(--accent-lime), var(--secondary-color)); }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        /* Eco Score Ring */
+        .score-ring {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 25px auto;
+        }
+
+        .ring-background {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, 0deg 270deg, rgba(76, 175, 80, 0.2) 270deg 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: ringPulse 4s ease-in-out infinite;
+            box-shadow: var(--electric-glow);
+        }
+
+        @keyframes ringPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: var(--electric-glow);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 30px var(--primary-color), 0 0 60px var(--primary-color);
+            }
+        }
+
+        .ring-inner {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(76, 175, 80, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            backdrop-filter: blur(15px);
+            box-shadow: inset 0 0 30px rgba(76, 175, 80, 0.3);
+            border: 1px solid var(--primary-color);
+        }
+
+        .score-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            line-height: 1;
+            text-shadow: var(--electric-glow);
+            animation: numberGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes numberGlow {
+            from { text-shadow: var(--electric-glow); }
+            to { text-shadow: 0 0 30px var(--primary-color), 0 0 60px var(--primary-color); }
+        }
+
+        .score-label {
+            font-size: 1rem;
+            color: var(--primary-color);
+            margin-top: 8px;
+            font-weight: 600;
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        /* Additional styles for other components */
+        .carbon-visualization {
+            position: relative;
+            height: 220px;
+            margin: 25px 0;
+            border-radius: 20px;
+            background: rgba(76, 175, 80, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 20px rgba(76, 155, 175, 0.3);
+        }
+
+        .carbon-graph {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(180deg, var(--primary-color) 0%, rgba(76, 175, 80, 0.3) 100%);
+            animation: carbonReduction 6s ease-in-out infinite;
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        @keyframes carbonReduction {
+            0%, 100% { 
+                height: 60%;
+                box-shadow: 0 0 20px var(--primary-color);
+            }
+            50% { 
+                height: 25%;
+                box-shadow: 0 0 40px var(--primary-color);
+            }
+        }
+
+        .carbon-stats {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            right: 30px;
+            color: var(--primary-color);
+            text-align: center;
+            z-index: 2;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #001100;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 15px 30px rgba(76, 175, 80, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin: 12px 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid var(--primary-color);
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--electric-glow);
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Achievement Grid */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 25px;
+        }
+
+        .achievement-badge {
+            background: rgba(76, 175, 80, 0.15);
+            border-radius: 18px;
+            padding: 25px 15px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+        }
+
+        .achievement-badge:hover {
+            background: rgba(76, 175, 80, 0.25);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: var(--electric-glow);
+            border-color: var(--primary-color);
+        }
+
+        .badge-icon {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+            animation: badgeFloat 3s ease-in-out infinite;
+            display: block;
+            filter: drop-shadow(0 0 5px var(--primary-color));
+        }
+
+        @keyframes badgeFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(5deg); }
+        }
+
+        .badge-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        /* Challenge Items */
+        .challenge-item {
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 18px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+        }
+
+        .challenge-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary-color);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .challenge-item:hover {
+            background: rgba(76, 175, 80, 0.2);
+            transform: translateX(12px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .challenge-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .challenge-dot {
+            width: 14px;
+            height: 14px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            margin-right: 18px;
+            animation: challengePulse 2s infinite;
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        @keyframes challengePulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+                box-shadow: 0 0 15px var(--primary-color);
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: scale(1.2);
+                box-shadow: 0 0 25px var(--primary-color);
+            }
+        }
+
+        /* Lens Interface */
+        .lens-preview {
+            position: relative;
+            height: 220px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 20px;
+            margin: 25px 0;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .lens-preview:hover {
+            background: rgba(76, 175, 80, 0.2);
+            transform: scale(1.02);
+            box-shadow: var(--electric-glow);
+        }
+
+        .scan-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border: 4px solid var(--accent-electric);
+            border-radius: 50%;
+            animation: scanPulse 3s ease-in-out infinite;
+            box-shadow: 0 0 20px var(--accent-electric);
+        }
+
+        .scan-animation::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(0, 191, 255, 0.5);
+            border-radius: 50%;
+            animation: scanPulse 3s ease-in-out infinite 0.5s;
+        }
+
+        .scan-animation::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: var(--accent-electric);
+            border-radius: 50%;
+            animation: scanCore 2s ease-in-out infinite;
+            box-shadow: 0 0 10px var(--accent-electric);
+        }
+
+        @keyframes scanPulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.3); 
+                opacity: 0.3; 
+            }
+        }
+
+        @keyframes scanCore {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .lens-text {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--primary-color);
+            font-weight: 600;
+            text-align: center;
+            z-index: 2;
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        /* Leaderboard Styles */
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+        }
+
+        .leaderboard-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(6, 38, 43, 0.3);
+        }
+
+        .rank-1 { background: rgba(76, 175, 80, 0.2); }
+        .rank-2 { background: rgba(129, 199, 132, 0.15); }
+        .rank-3 { background: rgba(0, 191, 255, 0.15); }
+        .rank-current { background: rgba(127, 255, 0, 0.15); }
+
+        .rank-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .rank-medal {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            animation: medalShine 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 5px var(--primary-color));
+        }
+
+        @keyframes medalShine {
+            0%, 100% { filter: drop-shadow(0 0 5px var(--primary-color)) brightness(1); }
+            50% { filter: drop-shadow(0 0 10px var(--primary-color)) brightness(1.3); }
+        }
+
+        .rank-details h4 {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        .rank-details p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .rank-points {
+            font-weight: 900;
+            font-size: 1.3rem;
+            text-shadow: 0 0 5px currentColor;
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--glass-border);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-electric));
+            border-radius: 5px;
+            animation: progressGrow 3s ease-out;
+            box-shadow: 0 0 20px var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: progressShine 2s ease-in-out infinite;
+        }
+
+        @keyframes progressGrow {
+            from { width: 0%; }
+            to { width: var(--progress-width, 85%); }
+        }
+
+        @keyframes progressShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Students Garden */
+        .students-garden {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30vh;
+            z-index: 1;
+            background: 
+                linear-gradient(
+                    180deg,
+                    rgba(76, 175, 80, 0.1) 0%,
+                    rgba(129, 199, 132, 0.2) 40%,
+                    rgba(127, 255, 0, 0.4) 100%
+                );
+            opacity: 0.8;
+        }
+
+        .student-group {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding: 0 5%;
+        }
+
+        .student {
+            position: relative;
+            animation: studentActivity 4s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--glass-bg);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            padding: 10px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .student:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 10px 20px rgba(76, 175, 80, 0.6));
+            background: rgba(11, 196, 202, 0.2);
+            box-shadow: var(--electric-glow);
+        }
+
+        .student-1 { animation-delay: 0s; }
+        .student-2 { animation-delay: 0.5s; }
+        .student-3 { animation-delay: 1s; }
+        .student-4 { animation-delay: 1.5s; }
+        .student-5 { animation-delay: 2s; }
+        .student-6 { animation-delay: 2.5s; }
+
+        @keyframes studentActivity {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(1deg); }
+            75% { transform: translateY(-2px) rotate(-0.5deg); }
+        }
+
+        .student-info {
+            background: rgba(130, 180, 221, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(146, 181, 235, 0.2);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid var(--primary-color);
+        }
+
+        .student-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .student-activity {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .student-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 5px var(--primary-color));
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(76, 175, 80, 0.95);
+            color: #2dbed8;
+            padding: 20px 30px;
+            border-radius: 20px;
+            font-weight: 600;
+            transform: translateX(120%);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 2000;
+            box-shadow: var(--electric-glow);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--primary-color);
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .road-point {
+                width: 60px;
+                height: 60px;
+            }
+
+            .point-icon {
+                font-size: 1.5rem;
+            }
+
+            .dashboard-content {
+                width: 98%;
+                height: 98%;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .glass-card {
+                padding: 25px;
+            }
+
+            .logo {
+                font-size: 3rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Road Interface Container -->
+    <div class="road-container">
+        <!-- Background Elements -->
+        <div class="background-elements">
+            <div class="cloud cloud1"></div>
+            <div class="cloud cloud2"></div>
+            <div class="cloud cloud3"></div>
+        </div>
+
+      
+
+        <!-- Road Points -->
+        <div class="road-point point-1" onclick="openDashboard('eco-score')">
+            <div class="point-icon">🏆</div>
+            <div class="point-label">Eco Score</div>
+        </div>
+
+        <div class="road-point point-2" onclick="openDashboard('carbon-footprint')">
+            <div class="point-icon">🌍</div>
+            <div class="point-label">Carbon Impact</div>
+        </div>
+
+        <div class="road-point point-3" onclick="openDashboard('eco-scanner')">
+            <div class="point-icon">📱</div>
+            <div class="point-label">AI Scanner</div>
+        </div>
+
+        <div class="road-point point-4" onclick="openDashboard('achievements')">
+            <div class="point-icon">🏅</div>
+            <div class="point-label">Achievements</div>
+        </div>
+
+        <div class="road-point point-5" onclick="openDashboard('leaderboard')">
+            <div class="point-icon">📈</div>
+            <div class="point-label">Leaderboard</div>
+        </div>
+    </div>
+
+    <!-- Students Garden Background -->
+    <div class="students-garden">
+        <div class="student-group">
+            <!-- Student 1: Arjun -->
+            <div class="student student-1" onclick="showStudentInfo('Arjun')">
+                <div class="student-info">
+                    <div class="student-icon">🌱</div>
+                    <div class="student-name">Arjun Kumar</div>
+                    <div class="student-activity">Tree Planting Specialist</div>
+                    <div style="font-size: 0.8rem; color: var(--primary-color); font-weight: 600;">1,156 Points | 12-day Streak</div>
+                </div>
+            </div>
+
+            <!-- Student 2: Priya -->
+            <div class="student student-2" onclick="showStudentInfo('Priya')">
+                <div class="student-info">
+                    <div class="student-icon">🌿</div>
+                    <div class="student-name">Priya Sharma</div>
+                    <div class="student-activity">Garden Maintenance Expert</div>
+                    <div style="font-size: 0.8rem; color: var(--accent-electric); font-weight: 600;">1,247 Points | 15-day Streak</div>
+                </div>
+            </div>
+
+            <!-- Student 3: Rahul -->
+            <div class="student student-3" onclick="showStudentInfo('Rahul')">
+                <div class="student-info">
+                    <div class="student-icon">🌾</div>
+                    <div class="student-name">Rahul Singh</div>
+                    <div class="student-activity">Soil Conservation Leader</div>
+                    <div style="font-size: 0.8rem; color: var(--accent-lime); font-weight: 600;">1,089 Points | 10-day Streak</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Modal -->
+    <div class="dashboard-modal" id="dashboardModal">
+        <div class="dashboard-content" id="dashboardContent">
+            <button class="close-btn" onclick="closeDashboard()">×</button>
+            
+            <!-- Animated Background -->
+            <div class="animated-background"></div>
+            
+            <!-- Dashboard Container -->
+            <div class="dashboard-container">
+                <!-- Header -->
+                <div class="header">
+                    <h1 class="logo">🌱 EcoVerse Campus</h1>
+                    
+                </div>
+
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid" id="dashboardGrid">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Action completed!</div>
+
+    <script>
+        const dashboardData = {
+            'eco-score': `
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon eco-score">🏆</div>
+                        <div class="card-title">Your Eco Impact</div>
+                    </div>
+                    <div class="score-ring">
+                        <div class="ring-background">
+                            <div class="ring-inner">
+                                <div class="score-number">947</div>
+                                <div class="score-label">Eco Points</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="--progress-width: 85%; width: 85%;"></div>
+                    </div>
+                    <p style="text-align: center; margin-top: 20px; color: var(--primary-color); font-weight: 600; font-size: 1.1rem; text-shadow: 0 0 5px var(--primary-color);">
+                        🌟 Level 9 - Environmental Champion!
+                    </p>
+                </div>
+            `,
+            'carbon-footprint': `
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon carbon-footprint">🌍</div>
+                        <div class="card-title">Carbon Impact</div>
+                    </div>
+                    <div class="carbon-visualization">
+                        <div class="carbon-graph"></div>
+                        <div class="carbon-stats">
+                            <h3 style="font-size: 3rem; color: var(--primary-color); margin-bottom: 8px; font-weight: 900; text-shadow: 0 0 20px var(--primary-color);">-42%</h3>
+                            <p style="font-weight: 600; color: var(--primary-color); font-size: 1.1rem; text-shadow: 0 0 5px var(--primary-color);">Carbon Reduced This Month</p>
+                            <p style="font-size: 1.1rem; margin-top: 12px; color: var(--secondary-color); font-weight: 700; text-shadow: 0 0 5px var(--secondary-color);">
+                                🌱 3.2 tons CO₂ saved!
+                            </p>
+                        </div>
+                    </div>
+                    <button class="action-btn" onclick="showCarbonDetails()">📊 Detailed Analysis</button>
+                </div>
+            `,
+            'eco-scanner': `
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon eco-lens">📱</div>
+                        <div class="card-title">AI Eco Scanner</div>
+                    </div>
+                    <div class="lens-preview" onclick="activateEcoScanner()">
+                        <div class="scan-animation"></div>
+                        <div class="lens-text">Scan Environment</div>
+                    </div>
+                    <button class="action-btn" onclick="activateEcoScanner()">Start Scan</button>
+                </div>
+            `,
+            'achievements': `
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon achievements">🏅</div>
+                        <div class="card-title">Achievements</div>
+                    </div>
+                    <div class="achievement-grid">
+                        <div class="achievement-badge" onclick="showAchievement('Tree Planter')">
+                            <div class="badge-icon">🌳</div>
+                            <div class="badge-name">Tree Planter</div>
+                        </div>
+                        <div class="achievement-badge" onclick="showAchievement('Waste Warrior')">
+                            <div class="badge-icon">🗑️</div>
+                            <div class="badge-name">Waste Warrior</div>
+                        </div>
+                        <div class="achievement-badge" onclick="showAchievement('Carbon Cutter')">
+                            <div class="badge-icon">⚙️</div>
+                            <div class="badge-name">Carbon Cutter</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon challenges">🚩</div>
+                        <div class="card-title">Today's Challenges</div>
+                    </div>
+                    <div class="challenge-item" onclick="showChallenge('Plant 5 Trees')">
+                        <div class="challenge-dot"></div>
+                        <div>Plant 5 Trees</div>
+                    </div>
+                    <div class="challenge-item" onclick="showChallenge('Clean Campus Area')">
+                        <div class="challenge-dot"></div>
+                        <div>Clean Campus Area</div>
+                    </div>
+                    <div class="challenge-item" onclick="showChallenge('Reduce Water Usage')">
+                        <div class="challenge-dot"></div>
+                        <div>Reduce Water Usage</div>
+                    </div>
+                </div>
+            `,
+            'leaderboard': `
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-icon leaderboard">📈</div>
+                        <div class="card-title">Leaderboard</div>
+                    </div>
+                    <div class="leaderboard-item rank-1">
+                        <div class="rank-info">
+                            <div class="rank-medal">🥇</div>
+                            <div class="rank-details">
+                                <h4>Ashwin Roy</h4>
+                                <p>1,543 Points</p>
+                            </div>
+                        </div>
+                        <div class="rank-points">1543</div>
+                    </div>
+                    <div class="leaderboard-item rank-2">
+                        <div class="rank-info">
+                            <div class="rank-medal">🥈</div>
+                            <div class="rank-details">
+                                <h4>Priya Sharma</h4>
+                                <p>1,247 Points</p>
+                            </div>
+                        </div>
+                        <div class="rank-points">1247</div>
+                    </div>
+                    <div class="leaderboard-item rank-3">
+                        <div class="rank-info">
+                            <div class="rank-medal">🥉</div>
+                            <div class="rank-details">
+                                <h4>Arjun Kumar</h4>
+                                <p>1,156 Points</p>
+                            </div>
+                        </div>
+                        <div class="rank-points">1156</div>
+                    </div>
+                    <div class="leaderboard-item rank-current">
+                        <div class="rank-info">
+                            <div class="rank-medal">🌱</div>
+                            <div class="rank-details">
+                                <h4>You</h4>
+                                <p>947 Points</p>
+                            </div>
+                        </div>
+                        <div class="rank-points">947</div>
+                    </div>
+                </div>
+            `
+        };
+
+        function openDashboard(section) {
+            const modal = document.getElementById('dashboardModal');
+            const grid = document.getElementById('dashboardGrid');
+            
+            grid.innerHTML = dashboardData[section] || dashboardData['eco-score'];
+            modal.style.display = 'block';
+            showToast('Opening ' + section.replace('-', ' ') + ' dashboard!');
+        }
+
+        function closeDashboard() {
+            const modal = document.getElementById('dashboardModal');
+            modal.style.display = 'none';
+        }
+
+        function showStudentInfo(name) {
+            showToast('Viewing ' + name + '\'s profile!');
+        }
+
+        function showCarbonDetails() {
+            showToast('Detailed Carbon Analysis coming soon!');
+        }
+
+        function activateEcoScanner() {
+            showToast('Eco Scanner Activated!');
+        }
+
+        function showAchievement(achievement) {
+            showToast('Achievement unlocked: ' + achievement);
+        }
+
+        function showChallenge(challenge) {
+            showToast('Challenge started: ' + challenge);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('dashboardModal');
+            if (event.target == modal) {
+                closeDashboard();
+            }
+        }
+    </script>
+</body>
+</html>

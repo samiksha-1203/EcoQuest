@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EcoQuest — Gamified Environmental Learning</title>
+  <meta name="description" content="EcoQuest - Gamified environmental education for schools & colleges. Learn, compete, act." />
+  <style>
+    /* ====== CSS VARIABLES ====== */
+    :root{
+      --bg: #fbfdf9;
+      --card: #ffffff;
+      --muted: #617073;
+      --accent: #16a34a;
+      --accent-2: #22c55e;
+      --glass: rgba(255,255,255,0.6);
+      --shadow: 0 6px 18px rgba(16,24,40,0.08);
+      --radius: 14px;
+      --glass-2: rgba(255,255,255,0.35);
+      --text: #0f1724;
+    }
+    :root.dark{
+      --bg: #0b1220;
+      --card: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      --muted: #9aa6b0;
+      --accent: #64f594;
+      --accent-2: #2fd27a;
+      --glass: rgba(255,255,255,0.02);
+      --shadow: 0 8px 24px rgba(2,6,23,0.6);
+      --glass-2: rgba(255,255,255,0.02);
+      --text: #e6eef3;
+    }
+
+    /* ====== Global ====== */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(34,197,94,0.06), transparent),
+                  radial-gradient(900px 400px at 90% 90%, rgba(6,182,212,0.03), transparent),
+                  var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      transition: background .35s ease, color .25s ease;
+      padding-bottom:60px;
+    }
+
+    a{color:inherit; text-decoration:none}
+    .container{max-width:1200px; margin:0 auto; padding:28px}
+
+    /* ====== Top Nav ====== */
+    header.topnav{
+      position:sticky; top:10px; z-index:50;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3));
+      backdrop-filter: blur(6px);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin: 12px auto;
+      padding:10px 16px;
+    }
+    :root.dark header.topnav{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
+    .topbar{display:flex;align-items:center;gap:16px; justify-content:space-between}
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo {
+      width:48px;
+      height:48px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      background:none;
+      box-shadow:none;
+    }
+    .logo img {
+      width:100%;
+      height:100%;
+      object-fit:contain;
+    }
+    .brand h1{font-size:1.05rem; margin:0}
+    nav.actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:10px; cursor:pointer;
+      border:0; font-weight:600; font-size:0.95rem;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn-ghost{
+      background:transparent; color:var(--text); padding:8px 10px;
+    }
+    .btn-primary{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:#022; box-shadow: 0 8px 24px rgba(34,197,94,0.14);
+    }
+
+    /* ====== Hero ====== */
+    .hero{
+      display:grid; grid-template-columns: 1fr 420px; gap:28px; align-items:center;
+      margin-top:26px;
+    }
+    .hero .left{padding:18px;}
+    .kicker{
+      display:inline-flex; gap:10px; align-items:center;
+      padding:6px 10px; border-radius:999px; font-weight:700;
+      background: linear-gradient(90deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02));
+      color:var(--accent);
+      width:max-content;
+      margin-bottom:14px;
+    }
+    .headline{font-size:2.1rem; line-height:1.03; margin:0 0 12px}
+    .lead{color:var(--muted); margin-bottom:18px; max-width:70ch}
+    .cta-row{display:flex; gap:12px; align-items:center}
+    .card-hero{
+      background:var(--card); border-radius:16px; padding:18px; box-shadow:var(--shadow);
+    }
+
+    /* ====== Feature grid ====== */
+    .features{
+      display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      gap:18px; margin-top:22px;
+    }
+    .feature{
+      background:var(--card); padding:18px; border-radius:12px; box-shadow:var(--shadow);
+      display:flex; gap:12px; align-items:flex-start;
+    }
+    .feature svg{width:46px;height:46px; flex-shrink:0}
+    .feature h3{margin:0;font-size:1.05rem; color:var(--text)}
+    .feature p{margin:6px 0 0; color:var(--muted); font-size:0.95rem}
+
+    /* ====== Right hero preview (device mock) ====== */
+    .device{
+      border-radius:18px; overflow:hidden; box-shadow: 0 18px 40px rgba(10,20,30,0.08);
+      border:1px solid rgba(0,0,0,0.04);
+    }
+    :root.dark .device{border:1px solid rgba(255,255,255,0.03)}
+    .device .screen{padding:18px;}
+
+    /* ====== CTA BAND ====== */
+    .cta-band{
+      margin-top:28px; background:linear-gradient(90deg,var(--accent-2),var(--accent));
+      color:#022; border-radius:14px; padding:18px; display:flex; justify-content:space-between; align-items:center;
+      gap:16px; box-shadow: 0 12px 32px rgba(34,197,94,0.1);
+    }
+    .cta-band p{margin:0; font-weight:700}
+    .cta-band small{display:block; font-weight:500; color:rgba(2,2,6,0.6)}
+
+    /* ====== Footer ====== */
+    footer{margin-top:36px; text-align:center; color:var(--muted); font-size:0.9rem}
+
+    /* ====== Responsive ====== */
+    @media (max-width:980px){
+      .hero{grid-template-columns:1fr}
+      header.topnav{margin:10px}
+    }
+    @media (max-width:520px){
+      .headline{font-size:1.5rem}
+      .brand h1{font-size:0.95rem}
+      .device{display:none}
+    }
+  </style>
+</head>
+<body>
+  <!-- ====== NAVBAR ====== -->
+  <header class="topnav container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo"><img src="logo.png" alt="EcoQuest Logo" /></div>
+        <div>
+          <h1>EcoQuest</h1>
+          <div class="tiny muted">Learn • Play • Act</div>
+        </div>
+      </div>
+      <nav class="actions">
+        <button id="themeToggle" class="btn btn-ghost">🌙 Dark</button>
+        <button class="btn btn-ghost">Log in</button>
+        <button class="btn btn-primary">Register</button>
+        <a href="challenges.html" class="btn btn-ghost">Challenges</a>
+        <a href="arfunzone.html" class="btn btn-ghost">AR Fun Zone</a>
+        <a href="learning.html" class="btn btn-ghost">Learning Hub</a>
+        <a href="studentdash.html" class="btn btn-ghost">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="left">
+        <div class="kicker">🏫 For Schools & Colleges</div>
+        <h2 class="headline">Gamified environmental education that students actually love.</h2>
+        <p class="lead">Interactive modules, team challenges, real-world missions and a leaderboard to spark healthy competition. Track progress, award badges, and drive impact — one class at a time.</p>
+        <div class="cta-row mb-6">
+          <button class="btn btn-primary">Get Started — Free</button>
+          <button class="btn btn-ghost">Quick Demo</button>
+        </div>
+        <div class="features">
+          <div class="feature"><h3>Interactive Learning</h3><p>Short, animated lessons with checks & quizzes to reinforce knowledge.</p></div>
+          <div class="feature"><h3>Gamified Challenges</h3><p>Points, badges, seasonal events and inter-school tournaments.</p></div>
+          <div class="feature"><h3>Community & Projects</h3><p>Class projects, cleanup missions and shared dashboards to show impact.</p></div>
+        </div>
+      </div>
+      
+    </section>
+
+    <!-- CTA BAND -->
+    <section class="cta-band">
+      <div>
+        <p>Teachers & schools: Start your EcoQuest journey today 🚀</p>
+        <small>Free trial • Unlimited students • Cancel anytime</small>
+      </div>
+      <button class="btn btn-primary">Start free trial</button>
+    </section>
+
+    <!-- Features Section instead of Dashboard -->
+    <section class="features" style="margin-top:32px">
+      <div class="feature"><h3>📊 Track Progress</h3><p>Teachers can monitor student learning milestones and mission outcomes in real-time.</p></div>
+      <div class="feature"><h3>🏆 Rewards & Badges</h3><p>Students earn badges and rewards for active participation, boosting motivation.</p></div>
+      <div class="feature"><h3>🌍 Real Impact</h3><p>EcoQuest missions tie directly to real-world impact, like tree planting and recycling drives.</p></div>
+    </section>
+  </main>
+
+  <footer class="container">
+    © 2025 EcoQuest. Made with 🌱 for a greener tomorrow.
+  </footer>
+
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      themeToggle.innerText = document.documentElement.classList.contains('dark') ? '☀️ Light' : '🌙 Dark';
+    });
+  </script>
+</body>
+</html>

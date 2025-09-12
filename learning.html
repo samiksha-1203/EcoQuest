@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoLearn - Interactive Learning Hub</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #2d5a2d;
+            --light-green: #4caf50;
+            --accent-blue: #2196f3;
+            --warm-orange: #ff9800;
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --quiz-correct: #28a745;
+            --quiz-incorrect: #dc3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+            min-height: 100vh;
+        }
+
+        .hero-section {
+            background: var(--gradient-bg);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 50px 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="3" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="1" fill="white" opacity="0.1"/></svg>');
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(100px); }
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border: 1px solid rgba(76, 175, 80, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--light-green), var(--accent-blue));
+        }
+
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .lesson-card {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 25px rgba(33, 150, 243, 0.2);
+        }
+
+        /* Enhanced Quiz Cards */
+        .quiz-flashcard {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 15px 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-flashcard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--accent-blue), var(--light-green));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .quiz-flashcard:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .quiz-flashcard:hover::before {
+            opacity: 0.1;
+        }
+
+        .quiz-option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-blue);
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.2);
+        }
+
+        .quiz-option:hover::before {
+            left: 100%;
+        }
+
+        .quiz-option.correct {
+            border-color: var(--quiz-correct);
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            animation: correct-pulse 0.6s ease;
+        }
+
+        .quiz-option.incorrect {
+            border-color: var(--quiz-incorrect);
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correct-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .hint-box {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .hint-box.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .points-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--quiz-correct);
+            z-index: 9999;
+            animation: points-float 2s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes points-float {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -70%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -100%) scale(1); }
+        }
+
+        /* Enhanced Story Cards */
+        .story-card {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--warm-orange), #ff6b6b);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .story-card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        .story-card:hover::after {
+            opacity: 0.1;
+        }
+
+        .video-embed {
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            height: 315px;
+        }
+
+        /* Enhanced Proverb Section */
+        .proverb-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .proverb-card {
+            background: linear-gradient(135deg, #fff9f0, #ffefd5);
+            border-radius: 20px;
+            padding: 30px;
+            border-left: 6px solid var(--warm-orange);
+            position: relative;
+            box-shadow: 0 10px 25px rgba(255, 152, 0, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .proverb-card::before {
+            content: '"';
+            font-size: 80px;
+            color: var(--warm-orange);
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            opacity: 0.2;
+            font-family: serif;
+        }
+
+        .proverb-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 152, 0, 0.2);
+        }
+
+        .proverb-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 15px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .proverb-author {
+            font-weight: 600;
+            color: var(--warm-orange);
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .proverb-translation {
+            background: rgba(255, 152, 0, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-style: italic;
+            border-left: 3px solid var(--warm-orange);
+        }
+
+        /* Lesson Content Modal */
+        .lesson-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lesson-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Activity Cards */
+        .activity-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid var(--accent-blue);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .activity-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.2);
+        }
+
+        /* Quiz Category Cards */
+        .quiz-category-card {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .quiz-category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .proverb-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .lesson-content {
+                max-width: 95%;
+                padding: 20px;
+            }
+        }
+
+        /* Progress tracking */
+        .progress-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: conic-gradient(var(--light-green) 0deg calc(var(--progress, 60) * 3.6deg), #e0e0e0 calc(var(--progress, 60) * 3.6deg) 360deg);
+        }
+
+        .progress-circle::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .progress-text {
+            position: relative;
+            z-index: 1;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        /* Enhanced badges */
+        .badge-earned {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #333;
+            border-radius: 20px;
+            padding: 10px 18px;
+            margin: 5px;
+            display: inline-block;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+            animation: badge-glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes badge-glow {
+            0% { box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3); }
+            100% { box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5); }
+        }
+
+        .eco-points {
+            background: linear-gradient(45deg, var(--light-green), #66bb6a);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 25px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .eco-points:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        /* Additional styles for new features */
+        .quiz-stats {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .stat-item {
+            margin: 10px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        .story-progress-bar {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .story-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--warm-orange), #ff6b6b);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">🌱 EcoQuest</h1>
+                    <p class="lead">Discover, Learn, and Act for a Sustainable Future</p>
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="progress-circle mx-auto" style="--progress: 60;">
+                                <div class="progress-text" id="progress-percentage">60%</div>
+                            </div>
+                            <p class="text-center mt-2">Course Progress</p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="eco-points" id="eco-points-display">
+                                <i class="fas fa-leaf me-2"></i>Your Eco Points: <span id="eco-points">1245</span>
+                                <div class="small mt-1">Rank: #<span id="user-rank">23</span> in your school</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="badges-section">
+                        <h5>Recent Achievements</h5>
+                        <span class="badge-earned"><i class="fas fa-recycle me-1"></i>Waste Warrior</span>
+                        <span class="badge-earned"><i class="fas fa-seedling me-1"></i>Tree Hugger</span>
+                        <span class="badge-earned"><i class="fas fa-water me-1"></i>Water Saver</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Navigation Pills -->
+        <ul class="nav nav-pills justify-content-center mb-4" id="learningTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="curriculum-tab" data-bs-toggle="pill" data-bs-target="#curriculum" type="button" role="tab">
+                    <i class="fas fa-book me-2"></i>Curriculum
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="quizzes-tab" data-bs-toggle="pill" data-bs-target="#quizzes" type="button" role="tab">
+                    <i class="fas fa-question-circle me-2"></i>Quizzes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stories-tab" data-bs-toggle="pill" data-bs-target="#stories" type="button" role="tab">
+                    <i class="fas fa-book-open me-2"></i>Stories
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="proverbs-tab" data-bs-toggle="pill" data-bs-target="#proverbs" type="button" role="tab">
+                    <i class="fas fa-quote-right me-2"></i>Eco Wisdom
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="learningTabsContent">
+            <!-- Curriculum Tab -->
+            <div class="tab-pane fade show active" id="curriculum" role="tabpanel">
+                <div class="section-card">
+                    <h3 class="mb-4"><i class="fas fa-graduation-cap me-3 text-success"></i>Environmental Science Curriculum</h3>
+                    
+                    <div class="row">
+                        <div class="col-lg-4 mb-4">
+                            <div class="lesson-card" onclick="openLesson('chemistry')">
+                                <h5><i class="fas fa-flask me-2 text-primary"></i>Chemistry of Pollution</h5>
+                                <p>Understand how pollutants affect our environment at molecular level</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">12 Lessons</span>
+                                    <button class="btn btn-sm btn-success">Explore</button>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-primary" style="width: 40%"></div>
+                                </div>
+                                <small class="text-muted">5/12 lessons completed</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 mb-4">
+                            <div class="lesson-card" onclick="openLesson('ecosystem')">
+                                <h5><i class="fas fa-microscope me-2 text-success"></i>Ecosystem Science</h5>
+                                <p>Explore biodiversity, food chains, and ecological balance</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-success">8 Lessons</span>
+                                    <button class="btn btn-sm btn-success">Explore</button>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-success" style="width: 75%"></div>
+                                </div>
+                                <small class="text-muted">6/8 lessons completed</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 mb-4">
+                            <div class="lesson-card" onclick="openLesson('climate')">
+                                <h5><i class="fas fa-thermometer-half me-2 text-danger"></i>Climate Change</h5>
+                                <p>Learn about greenhouse gases and global warming effects</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">15 Lessons</span>
+                                    <button class="btn btn-sm btn-success">Explore</button>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-danger" style="width: 60%"></div>
+                                </div>
+                                <small class="text-muted">9/15 lessons completed</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Quizzes Tab -->
+            <div class="tab-pane fade" id="quizzes" role="tabpanel">
+                <div class="section-card">
+                    <h3 class="mb-4"><i class="fas fa-brain me-3 text-info"></i>Environmental Knowledge Quizzes</h3>
+                    
+                    <!-- Quiz Stats -->
+                    <div class="quiz-stats">
+                        <div class="row">
+                            <div class="col-md-3 stat-item">
+                                <div class="stat-value" id="total-points">1245</div>
+                                <small>Total Points</small>
+                            </div>
+                            <div class="col-md-3 stat-item">
+                                <div class="stat-value" id="quizzes-completed">12</div>
+                                <small>Quizzes Completed</small>
+                            </div>
+                            <div class="col-md-3 stat-item">
+                                <div class="stat-value" id="accuracy-rate">85%</div>
+                                <small>Accuracy Rate</small>
+                            </div>
+                            <div class="col-md-3 stat-item">
+                                <div class="stat-value" id="current-streak">7</div>
+                                <small>Day Streak</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Categories -->
+                    <div class="row mb-4">
+                        <div class="col-lg-4">
+                            <div class="quiz-category-card" onclick="startQuiz('pollution')">
+                                <h5><i class="fas fa-smog me-2 text-warning"></i>Pollution Basics</h5>
+                                <p>Test your knowledge about different types of pollution</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">10 Questions • 5 min</span>
+                                    <button class="btn btn-sm btn-outline-primary">Take Quiz</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="quiz-category-card" onclick="startQuiz('waste')">
+                                <h5><i class="fas fa-recycle me-2 text-success"></i>Waste Management</h5>
+                                <p>Learn about recycling, composting, and waste reduction</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-success">15 Questions • 8 min</span>
+                                    <button class="btn btn-sm btn-outline-primary">Take Quiz</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="quiz-category-card" onclick="startQuiz('energy')">
+                                <h5><i class="fas fa-bolt me-2 text-primary"></i>Renewable Energy</h5>
+                                <p>Explore solar, wind, and other clean energy sources</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">12 Questions • 6 min</span>
+                                    <button class="btn btn-sm btn-outline-primary">Take Quiz</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Quiz Container -->
+                    <div id="quiz-container" style="display: none;">
+                        <div class="quiz-flashcard">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 id="quiz-title">Quiz Question</h5>
+                                <div>
+                                    <span class="badge bg-info" id="question-counter">1/10</span>
+                                    <span class="badge bg-success ms-2" id="current-points">Points: 0</span>
+                                </div>
+                            </div>
+                            
+                            <div id="question-content">
+                                <h6 id="question-text">Loading question...</h6>
+                                <div id="options-container">
+                                    <!-- Options will be inserted here -->
+                                </div>
+                                
+                                <div class="hint-box" id="hint-box">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    <span id="hint-text">Click here for a hint!</span>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-3">
+                                    <button class="btn btn-outline-warning" onclick="showHint()">
+                                        <i class="fas fa-lightbulb me-1"></i>Hint
+                                    </button>
+                                    <button class="btn btn-primary" id="next-question-btn" onclick="nextQuestion()" style="display: none;">
+                                        Next Question <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Results -->
+                    <div id="quiz-results" style="display: none;">
+                        <div class="quiz-flashcard text-center">
+                            <h3><i class="fas fa-trophy text-warning me-2"></i>Quiz Complete!</h3>
+                            <div class="row mt-4">
+                                <div class="col-md-4">
+                                    <div class="stat-value text-success" id="final-score">0</div>
+                                    <small>Points Earned</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-value text-info" id="correct-answers">0</div>
+                                    <small>Correct Answers</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-value text-primary" id="accuracy">0%</div>
+                                    <small>Accuracy</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-success mt-3" onclick="resetQuiz()">Take Another Quiz</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stories Tab -->
+            <div class="tab-pane fade" id="stories" role="tabpanel">
+                <div class="section-card">
+                    <h3 class="mb-4"><i class="fas fa-book-open me-3 text-warning"></i>Environmental Stories & Adventures</h3>
+                    
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="story-card" onclick="openStory('forest-guardian')">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-tree text-success fs-3 me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1">The Last Forest Guardian</h5>
+                                        <span class="badge bg-success">Adventure</span>
+                                    </div>
+                                </div>
+                                <p>Follow Maya's journey as she discovers the secrets of the forest and learns about deforestation's impact on wildlife.</p>
+                                <div class="story-progress-bar">
+                                    <div class="story-progress-fill" style="width: 75%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <small class="text-muted">3/4 chapters completed</small>
+                                    <button class="btn btn-outline-warning btn-sm">Continue Reading</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="story-card" onclick="openStory('oceans-cry')">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-fish text-info fs-3 me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1">Ocean's Cry</h5>
+                                        <span class="badge bg-info">Educational</span>
+                                    </div>
+                                </div>
+                                <p>Dive deep with Aqua the dolphin to understand marine pollution and its effects on ocean life.</p>
+                                <div class="story-progress-bar">
+                                    <div class="story-progress-fill" style="width: 40%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <small class="text-muted">2/5 chapters completed</small>
+                                    <button class="btn btn-outline-info btn-sm">Start Reading</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="story-card" onclick="openStory('clean-energy-heroes')">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-solar-panel text-primary fs-3 me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1">The Clean Energy Heroes</h5>
+                                        <span class="badge bg-primary">Innovation</span>
+                                    </div>
+                                </div>
+                                <p>Join a group of young inventors creating sustainable solutions for their community's energy needs.</p>
+                                <div class="story-progress-bar">
+                                    <div class="story-progress-fill" style="width: 16%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <small class="text-muted">1/6 chapters completed</small>
+                                    <button class="btn btn-outline-primary btn-sm">Begin Adventure</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="story-card" onclick="openStory('climate-champions')">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-globe text-danger fs-3 me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1">Climate Champions</h5>
+                                        <span class="badge bg-danger">Drama</span>
+                                    </div>
+                                </div>
+                                <p>Experience how climate change affects different regions through the eyes of children worldwide.</p>
+                                <div class="story-progress-bar">
+                                    <div class="story-progress-fill" style="width: 60%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <small class="text-muted">3/5 chapters completed</small>
+                                    <button class="btn btn-outline-danger btn-sm">Continue Story</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Featured Video -->
+                    <div class="mt-4">
+                        <h4><i class="fas fa-video me-2 text-primary"></i>Featured Educational Video</h4>
+                        <div class="video-embed">
+                            <iframe width="100%" height="315"   src="https://www.youtube.com/embed/oMhzCwVi0Kg"
+                                title="Environmental Conservation" frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <div class="mt-3">
+                            <h6>The Power of Small Actions</h6>
+                            <p>Learn how individual actions can make a collective impact on environmental conservation.</p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Activities -->
+                    <div class="mt-4">
+                        <h4><i class="fas fa-gamepad me-2 text-success"></i>Interactive Activities</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="activity-card" onclick="startActivity('ecosystem-builder')">
+                                    <h6><i class="fas fa-puzzle-piece me-2"></i>Ecosystem Builder Game</h6>
+                                    <p>Build and balance your own ecosystem by placing different species and environmental elements.</p>
+                                    <button class="btn btn-sm btn-success">Play Now</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="activity-card" onclick="startActivity('carbon-footprint')">
+                                    <h6><i class="fas fa-calculator me-2"></i>Carbon Footprint Calculator</h6>
+                                    <p>Calculate your daily carbon footprint and discover ways to reduce your environmental impact.</p>
+                                    <button class="btn btn-sm btn-info">Calculate</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Eco Wisdom (Proverbs) Tab -->
+            <div class="tab-pane fade" id="proverbs" role="tabpanel">
+                <div class="section-card">
+                    <h3 class="mb-4"><i class="fas fa-leaf me-3 text-success"></i>Eco Wisdom: Environmental Proverbs & Sayings</h3>
+                    
+                    <div class="proverb-container">
+                        <div class="proverb-card">
+                            <div class="proverb-text">
+                                "The Earth does not belong to us; we belong to the Earth. All things are connected like the blood that unites one family."
+                            </div>
+                            <div class="proverb-author">- Chief Seattle</div>
+                        </div>
+
+                        <div class="proverb-card">
+                            <div class="proverb-text">
+                                "In every walk with nature, one receives far more than they seek."
+                            </div>
+                            <div class="proverb-author">- John Muir</div>
+                        </div>
+
+                        <div class="proverb-card">
+                            <div class="proverb-text">
+                                "Vasudhaiva Kutumbakam - The world is one family, including all living beings and nature."
+                            </div>
+                            <div class="proverb-author">Sanskrit Wisdom</div>
+                        </div>
+
+                        <div class="proverb-card">
+                            <div class="proverb-text">
+                                "We do not inherit the Earth from our ancestors; we borrow it from our children."
+                            </div>
+                            <div class="proverb-author">Native American Proverb</div>
+                        </div>
+
+                        <div class="proverb-card">
+                            <div class="proverb-text">
+                                "Pahaad se darya behta hai, darya se samundar bharta hai. Prakriti ka ye chakra hai, ise samjhna zaroori hai."
+                            </div>
+                            <div class="proverb-author">Hindi Wisdom</div>
+                            <div class="proverb-translation">
+                                Translation: Rivers flow from mountains, oceans are filled by rivers. This is nature's cycle, understanding it is essential.
+                            </div>
+                        </div>
+
+                        <div class="proverb-card">
+                            <div class="proverb-text">
+                                "जैसा बीज बोते हैं, वैसा फल काटते हैं। प्रकृति के साथ यही न्याय है।"
+                            </div>
+                            <div class="proverb-author">Hindi Proverb</div>
+                            <div class="proverb-translation">
+                                As you sow, so shall you reap. This is justice with nature.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Take Action Section -->
+                    <div class="mt-5">
+                        <h4><i class="fas fa-hand-holding-heart me-2 text-success"></i>Take Action Today</h4>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="activity-card text-center" onclick="logAction('plant-tree')">
+                                    <i class="fas fa-seedling text-success fs-2 mb-2"></i>
+                                    <h6>Plant a Tree</h6>
+                                    <p class="small">Make a difference in your local environment</p>
+                                    <button class="btn btn-sm btn-success">Log Action</button>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="activity-card text-center" onclick="logAction('recycle')">
+                                    <i class="fas fa-recycle text-info fs-2 mb-2"></i>
+                                    <h6>Recycle Waste</h6>
+                                    <p class="small">Properly sort and recycle your waste</p>
+                                    <button class="btn btn-sm btn-info">Log Action</button>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="activity-card text-center" onclick="logAction('eco-transport')">
+                                    <i class="fas fa-bicycle text-warning fs-2 mb-2"></i>
+                                    <h6>Use Eco Transport</h6>
+                                    <p class="small">Walk, cycle, or use public transport</p>
+                                    <button class="btn btn-sm btn-warning">Log Action</button>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="activity-card text-center" onclick="logAction('save-energy')">
+                                    <i class="fas fa-lightbulb text-danger fs-2 mb-2"></i>
+                                    <h6>Save Energy</h6>
+                                    <p class="small">Turn off lights and unplug devices</p>
+                                    <button class="btn btn-sm btn-outline-danger">Log Action</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lesson Modal -->
+    <div class="lesson-modal" id="lesson-modal">
+        <div class="lesson-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <div id="lesson-content-body">
+                <!-- Lesson content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Story Modal -->
+    <div class="lesson-modal" id="story-modal">
+        <div class="lesson-content">
+            <button class="close-modal" onclick="closeStoryModal()">&times;</button>
+            <div id="story-content-body">
+                <!-- Story content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Modal -->
+    <div class="lesson-modal" id="activity-modal">
+        <div class="lesson-content">
+            <button class="close-modal" onclick="closeActivityModal()">&times;</button>
+            <div id="activity-content-body">
+                <!-- Activity content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let quizScore = 0;
+        let correctAnswers = 0;
+        let userPoints = parseInt(document.getElementById('eco-points').textContent);
+
+        // Quiz data
+        const quizData = {
+            pollution: {
+                title: "Pollution Basics Quiz",
+                questions: [
+                    {
+                        question: "What is the primary cause of global warming?",
+                        options: ["Ocean currents", "Greenhouse gas emissions", "Solar radiation", "Wind patterns"],
+                        correct: 1,
+                        hint: "Think about gases like CO2 and methane that trap heat in the atmosphere."
+                    },
+                    {
+                        question: "Which of these is NOT a renewable energy source?",
+                        options: ["Solar power", "Wind energy", "Coal", "Hydroelectric power"],
+                        correct: 2,
+                        hint: "Look for the energy source that gets used up and cannot be replenished naturally."
+                    },
+                    {
+                        question: "What percentage of Earth's water is freshwater?",
+                        options: ["50%", "25%", "10%", "Less than 3%"],
+                        correct: 3,
+                        hint: "Most of Earth's water is in the oceans - freshwater is surprisingly scarce!"
+                    },
+                    {
+                        question: "Which gas makes up most of our atmosphere?",
+                        options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"],
+                        correct: 2,
+                        hint: "This gas makes up about 78% of the air we breathe."
+                    },
+                    {
+                        question: "What is the main cause of deforestation?",
+                        options: ["Natural disasters", "Agriculture and logging", "Climate change", "Animal migration"],
+                        correct: 1,
+                        hint: "Think about human activities that require clearing large areas of forest."
+                    }
+                ]
+            },
+            waste: {
+                title: "Waste Management Quiz",
+                questions: [
+                    {
+                        question: "How long does it take for plastic bottles to decompose?",
+                        options: ["1 year", "10 years", "100 years", "450+ years"],
+                        correct: 3,
+                        hint: "Plastic takes much longer than most people think to break down naturally."
+                    },
+                    {
+                        question: "Which of these can be composted?",
+                        options: ["Plastic bags", "Fruit peels", "Glass bottles", "Metal cans"],
+                        correct: 1,
+                        hint: "Look for organic materials that can decompose naturally."
+                    },
+                    {
+                        question: "What does the 3 R's of waste management stand for?",
+                        options: ["Read, Write, Recycle", "Reduce, Reuse, Recycle", "Remove, Replace, Repair", "Refuse, Reduce, Reuse"],
+                        correct: 1,
+                        hint: "These are the three main strategies for managing waste sustainably."
+                    }
+                ]
+            },
+            energy: {
+                title: "Renewable Energy Quiz",
+                questions: [
+                    {
+                        question: "Which country generates the most solar energy?",
+                        options: ["USA", "Germany", "China", "Japan"],
+                        correct: 2,
+                        hint: "This country has invested heavily in solar panel manufacturing and installation."
+                    },
+                    {
+                        question: "What is the cleanest form of energy?",
+                        options: ["Nuclear", "Solar", "Natural gas", "Hydroelectric"],
+                        correct: 1,
+                        hint: "This energy source produces no emissions during operation and is infinitely renewable."
+                    }
+                ]
+            }
+        };
+
+        // Lesson content data
+        const lessonData = {
+            chemistry: {
+                title: "Chemistry of Pollution",
+                content: `
+                    <h2><i class="fas fa-flask me-2"></i>Chemistry of Pollution</h2>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <h4>Chapter 1: Understanding Pollutants</h4>
+                            <p>Pollution occurs when harmful substances are introduced into the environment. Let's explore the molecular level of how pollutants interact with our ecosystem.</p>
+                            
+                            <h5>Types of Chemical Pollutants:</h5>
+                            <ul>
+                                <li><strong>Heavy Metals:</strong> Lead, Mercury, Cadmium</li>
+                                <li><strong>Organic Compounds:</strong> Pesticides, PCBs</li>
+                                <li><strong>Gases:</strong> CO₂, SO₂, NOₓ</li>
+                                <li><strong>Particulates:</strong> PM2.5, PM10</li>
+                            </ul>
+
+                            <div class="activity-card mt-3">
+                                <h6><i class="fas fa-microscope me-2"></i>Interactive Molecular Model</h6>
+                                <p>Explore how CO₂ molecules trap heat in our atmosphere</p>
+                                <div id="molecular-model" style="height: 200px; background: #f8f9fa; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                    <div class="text-center">
+                                        <i class="fas fa-atom fs-1 text-primary mb-2"></i>
+                                        <p>Interactive 3D Molecular Model<br><small class="text-muted">Click to explore molecular structures</small></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="mt-4">Chemical Reactions in Pollution</h5>
+                            <div class="bg-light p-3 rounded">
+                                <code>
+                                    SO₂ + H₂O → H₂SO₃ (Sulfurous Acid)<br>
+                                    2SO₂ + O₂ → 2SO₃<br>
+                                    SO₃ + H₂O → H₂SO₄ (Sulfuric Acid - Acid Rain)
+                                </code>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="video-embed" style="height: 250px;">
+                                <iframe width="100%" height="100%" 
+                                    src="https://www.youtube.com/embed/TXSK7Qvmlps"
+                                    title="Chemistry of Air Pollution" frameborder="0" allowfullscreen>
+                                </iframe>
+                            </div>
+                            <h6 class="mt-3">Educational Video: Air Pollution Chemistry</h6>
+                            
+                            <div class="activity-card mt-3">
+                                <h6><i class="fas fa-gamepad me-2"></i>Pollution Chemistry Game</h6>
+                                <p>Match pollutants with their chemical formulas</p>
+                                <button class="btn btn-primary btn-sm">Play Game</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Progress Tracker</h5>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-primary" style="width: 40%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Lesson 5 of 12 completed</span>
+                            <button class="btn btn-success" onclick="completeLesson('chemistry')">Mark as Complete</button>
+                        </div>
+                    </div>
+                `
+            },
+            ecosystem: {
+                title: "Ecosystem Science",
+                content: `
+                    <h2><i class="fas fa-microscope me-2"></i>Ecosystem Science</h2>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <h4>Chapter 1: Understanding Ecosystems</h4>
+                            <p>An ecosystem is a biological community of interacting organisms and their physical environment. Let's explore how these complex systems maintain balance.</p>
+                            
+                            <h5>Components of an Ecosystem:</h5>
+                            <ul>
+                                <li><strong>Producers:</strong> Plants, algae (autotrophs)</li>
+                                <li><strong>Primary Consumers:</strong> Herbivores</li>
+                                <li><strong>Secondary Consumers:</strong> Carnivores</li>
+                                <li><strong>Decomposers:</strong> Bacteria, fungi</li>
+                            </ul>
+
+                            <div class="activity-card mt-3">
+                                <h6><i class="fas fa-tree me-2"></i>Build Your Own Food Web</h6>
+                                <p>Create connections between different organisms in an ecosystem</p>
+                                <div id="food-web-builder" style="height: 300px; background: #e8f5e8; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                    <div class="text-center">
+                                        <i class="fas fa-network-wired fs-1 text-success mb-2"></i>
+                                        <p>Interactive Food Web Builder<br><small class="text-muted">Drag and connect organisms to create food chains</small></p>
+                                        <button class="btn btn-success">Start Building</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="video-embed" style="height: 250px;">
+                                <iframe width="100%" height="100%" 
+                                     src="https://www.youtube.com/embed/eGG7hyx_HlA"
+                                    title="Ecosystem Interactions" frameborder="0" allowfullscreen>
+                                </iframe>
+                            </div>
+                            <h6 class="mt-3">Video: Ecosystem Interactions</h6>
+                            
+                            <div class="activity-card mt-3">
+                                <h6><i class="fas fa-leaf me-2"></i>Biodiversity Counter</h6>
+                                <p>Count species in different habitats</p>
+                                <button class="btn btn-success btn-sm">Start Activity</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Progress Tracker</h5>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: 75%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Lesson 6 of 8 completed</span>
+                            <button class="btn btn-success" onclick="completeLesson('ecosystem')">Mark as Complete</button>
+                        </div>
+                    </div>
+                `
+            },
+            climate: {
+                title: "Climate Change",
+                content: `
+                    <h2><i class="fas fa-thermometer-half me-2"></i>Climate Change</h2>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <h4>Chapter 1: The Greenhouse Effect</h4>
+                            <p>Climate change refers to long-term shifts in global temperatures and weather patterns. While climate variations are natural, human activities have accelerated these changes since the 1800s.</p>
+                            
+                            <h5>Key Greenhouse Gases:</h5>
+                            <ul>
+                                <li><strong>Carbon Dioxide (CO₂):</strong> 76% of emissions</li>
+                                <li><strong>Methane (CH₄):</strong> 16% of emissions</li>
+                                <li><strong>Nitrous Oxide (N₂O):</strong> 6% of emissions</li>
+                                <li><strong>Fluorinated Gases:</strong> 2% of emissions</li>
+                            </ul>
+
+                            <div class="activity-card mt-3">
+                                <h6><i class="fas fa-globe-americas me-2"></i>Climate Simulator</h6>
+                                <p>See how different factors affect global temperature</p>
+                                <div id="climate-simulator" style="height: 300px; background: linear-gradient(to bottom, #87CEEB, #98FB98); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-temperature-high fs-1 mb-2"></i>
+                                        <p>Interactive Climate Simulator<br><small>Adjust CO₂ levels and see temperature changes</small></p>
+                                        <button class="btn btn-warning">Launch Simulator</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="video-embed" style="height: 250px;">
+                                <iframe width="100%" height="100%" 
+                                    src="https://www.youtube.com/embed/7o3EFSFAEFM"
+                                    title="Understanding Climate Change" frameborder="0" allowfullscreen>
+                                </iframe>
+                            </div>
+                            <h6 class="mt-3">Video: Understanding Climate Change</h6>
+                            
+                            <div class="activity-card mt-3">
+                                <h6><i class="fas fa-chart-line me-2"></i>Temperature Trends</h6>
+                                <p>Analyze global temperature data</p>
+                                <button class="btn btn-danger btn-sm">View Data</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Progress Tracker</h5>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-danger" style="width: 60%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Lesson 9 of 15 completed</span>
+                            <button class="btn btn-success" onclick="completeLesson('climate')">Mark as Complete</button>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // Story content data
+        const storyData = {
+            'forest-guardian': {
+                title: "The Last Forest Guardian",
+                content: `
+                    <h2><i class="fas fa-tree me-2 text-success"></i>The Last Forest Guardian</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="story-card">
+                                <h4>Chapter 3: The Ancient Oak</h4>
+                                <p class="lead">Maya approached the massive oak tree that stood at the heart of the forest. Its bark was scarred, but its presence commanded respect from all the woodland creatures.</p>
+                                
+                                <p>"This tree has been here for over 300 years," whispered the wise old owl, Hoot, who had become Maya's guide. "It has seen the forest grow and watched it shrink as humans expanded their cities."</p>
+                                
+                                <p>Maya placed her hand on the rough bark and felt a strange warmth. Suddenly, she could see the forest as it once was - vast and endless, teeming with life. Then the vision shifted, showing her the present day forest, now just a fraction of its former size.</p>
+                                
+                                <div class="activity-card mt-4">
+                                    <h6><i class="fas fa-question me-2"></i>Interactive Question</h6>
+                                    <p>What do you think Maya should do to help save the remaining forest?</p>
+                                    <div class="btn-group-vertical w-100">
+                                        <button class="btn btn-outline-primary text-start" onclick="selectStoryChoice(1)">
+                                            A) Organize her school to plant new trees
+                                        </button>
+                                        <button class="btn btn-outline-primary text-start" onclick="selectStoryChoice(2)">
+                                            B) Start a petition to protect the forest
+                                        </button>
+                                        <button class="btn btn-outline-primary text-start" onclick="selectStoryChoice(3)">
+                                            C) Learn more about the ecosystem first
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <p class="mt-4">"The forest needs champions," Hoot continued, "young people who understand that every tree cut down affects countless creatures that call this place home."</p>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button class="btn btn-secondary" onclick="previousChapter()">
+                                        <i class="fas fa-arrow-left me-1"></i>Previous Chapter
+                                    </button>
+                                    <button class="btn btn-success" onclick="nextChapter()">
+                                        Next Chapter <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="video-embed" style="height: 250px;">
+                                <iframe width="100%" height="100%" 
+                                    src="https://www.youtube.com/embed/6x8IuJlcXTk"
+                                    title="Deforestation Impact" frameborder="0" allowfullscreen>
+                                </iframe>
+                            </div>
+                            <h6 class="mt-3">Educational Video: Deforestation Impact</h6>
+                            
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Did You Know?</h6>
+                                    <p class="small">A single large tree can provide oxygen for up to 4 people per day and can absorb 22kg of CO₂ annually.</p>
+                                </div>
+                            </div>
+
+                            <div class="activity-card mt-3">
+                                <h6><i class="fas fa-users me-2"></i>Story Discussion</h6>
+                                <p>Share your thoughts about Maya's journey</p>
+                                <button class="btn btn-warning btn-sm">Join Discussion</button>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            'oceans-cry': {
+                title: "Ocean's Cry",
+                content: `
+                    <h2><i class="fas fa-fish me-2 text-info"></i>Ocean's Cry</h2>
+                    
+                    <div class="story-card">
+                        <h4>Chapter 2: The Plastic Island</h4>
+                        <p class="lead">Aqua the dolphin swam through what her grandmother once called the "crystal waters." But today, the water was murky, filled with floating debris.</p>
+                        
+                        <p>"What happened to our beautiful ocean?" Aqua asked her friend, Coral the sea turtle, who was struggling to swim with a plastic ring caught around her fin.</p>
+                        
+                        <p>"Humans on land create things that don't belong in water," Coral replied sadly. "This plastic will take hundreds of years to disappear, but we sea creatures suffer from it every day."</p>
+                        
+                        <div class="activity-card mt-4">
+                            <h6><i class="fas fa-trash-alt me-2"></i>Ocean Cleanup Challenge</h6>
+                            <p>Help Aqua clean the ocean by identifying recyclable items</p>
+                            <div id="cleanup-game" style="height: 200px; background: linear-gradient(to bottom, #87CEEB, #4682B4); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <div class="text-center text-white">
+                                    <i class="fas fa-fish fs-1 mb-2"></i>
+                                    <p>Ocean Cleanup Game</p>
+                                    <button class="btn btn-info">Start Cleaning</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="mt-4">As they swam deeper, they discovered a coral reef that was slowly turning white. "The water is getting warmer," explained an old wise whale. "When the water temperature changes, the coral gets sick and loses its color."</p>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Previous Chapter
+                            </button>
+                            <button class="btn btn-info">
+                                Next Chapter <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // Activity data
+        const activityData = {
+            'ecosystem-builder': {
+                title: "Ecosystem Builder Game",
+                content: `
+                    <h2><i class="fas fa-puzzle-piece me-2"></i>Ecosystem Builder Game</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="ecosystem-game" style="height: 400px; background: linear-gradient(to bottom, #87CEEB, #90EE90); border-radius: 15px; position: relative; overflow: hidden;">
+                                <div class="position-absolute top-50 start-50 translate-middle text-center text-white">
+                                    <i class="fas fa-leaf fs-1 mb-3"></i>
+                                    <h4>Build Your Ecosystem</h4>
+                                    <p>Drag and drop organisms to create a balanced ecosystem</p>
+                                    <button class="btn btn-success btn-lg" onclick="startEcosystemGame()">Start Building</button>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <h5>Game Instructions:</h5>
+                                <ul>
+                                    <li>Place producers (plants) first to provide energy</li>
+                                    <li>Add primary consumers (herbivores) that eat plants</li>
+                                    <li>Include secondary consumers (carnivores) for balance</li>
+                                    <li>Don't forget decomposers to recycle nutrients</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h5>Available Organisms:</h5>
+                            <div class="organism-toolkit">
+                                <div class="organism-item" draggable="true">
+                                    <i class="fas fa-seedling text-success"></i> Grass
+                                </div>
+                                <div class="organism-item" draggable="true">
+                                    <i class="fas fa-tree text-success"></i> Oak Tree
+                                </div>
+                                <div class="organism-item" draggable="true">
+                                    <i class="fas fa-rabbit text-warning"></i> Rabbit
+                                </div>
+                                <div class="organism-item" draggable="true">
+                                    <i class="fas fa-deer text-warning"></i> Deer
+                                </div>
+                                <div class="organism-item" draggable="true">
+                                    <i class="fas fa-wolf text-danger"></i> Wolf
+                                </div>
+                                <div class="organism-item" draggable="true">
+                                    <i class="fas fa-bacteria text-info"></i> Bacteria
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <h6>Ecosystem Health:</h6>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-success" style="width: 0%" id="ecosystem-health"></div>
+                                </div>
+                                <small class="text-muted">Add organisms to improve ecosystem balance</small>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            'carbon-footprint': {
+                title: "Carbon Footprint Calculator",
+                content: `
+                    <h2><i class="fas fa-calculator me-2"></i>Carbon Footprint Calculator</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>Daily Activities</h5>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Transportation Method:</label>
+                                        <select class="form-select" id="transport-method">
+                                            <option value="walk">Walking/Cycling</option>
+                                            <option value="bus">Public Bus</option>
+                                            <option value="car">Private Car</option>
+                                            <option value="motorbike">Motorbike</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Distance Traveled (km):</label>
+                                        <input type="number" class="form-control" id="distance" value="10">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Energy Usage:</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="ac-usage">
+                                            <label class="form-check-label">Air Conditioning (8+ hours)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="computer-usage">
+                                            <label class="form-check-label">Computer/TV (4+ hours)</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Diet Type:</label>
+                                        <select class="form-select" id="diet-type">
+                                            <option value="vegetarian">Vegetarian</option>
+                                            <option value="mixed">Mixed Diet</option>
+                                            <option value="meat-heavy">Meat-Heavy</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button class="btn btn-primary w-100" onclick="calculateFootprint()">Calculate My Footprint</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div id="footprint-results" style="display: none;">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h3>Your Daily Carbon Footprint</h3>
+                                        <div class="display-4 text-danger" id="total-emissions">0 kg</div>
+                                        <p class="text-muted">CO₂ equivalent per day</p>
+                                        
+                                        <div class="progress mb-3">
+                                            <div class="progress-bar" id="footprint-bar" style="width: 0%"></div>
+                                        </div>
+                                        
+                                        <div id="footprint-breakdown">
+                                            <!-- Breakdown will be inserted here -->
+                                        </div>
+                                        
+                                        <div class="mt-4">
+                                            <h6>Reduction Tips:</h6>
+                                            <ul class="list-unstyled" id="reduction-tips">
+                                                <!-- Tips will be inserted here -->
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Did You Know?</h6>
+                                    <p class="small">The average person produces about 4 tons of CO₂ per year. Small daily changes can make a big difference!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        // Functions for lesson management
+        function openLesson(lessonType) {
+            const modal = document.getElementById('lesson-modal');
+            const contentBody = document.getElementById('lesson-content-body');
+            
+            if (lessonData[lessonType]) {
+                contentBody.innerHTML = lessonData[lessonType].content;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('lesson-modal').style.display = 'none';
+        }
+
+        function completeLesson(lessonType) {
+            // Add points for completing a lesson
+            addPoints(50);
+            showPointsAnimation('+50 Points!');
+            
+            // Update progress (this would normally update a database)
+            console.log(`Lesson ${lessonType} completed!`);
+            
+            // Show completion message
+            alert('Congratulations! You\'ve completed this lesson and earned 50 eco points!');
+            
+            closeModal();
+        }
+
+        // Functions for story management
+        function openStory(storyId) {
+            const modal = document.getElementById('story-modal');
+            const contentBody = document.getElementById('story-content-body');
+            
+            if (storyData[storyId]) {
+                contentBody.innerHTML = storyData[storyId].content;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeStoryModal() {
+            document.getElementById('story-modal').style.display = 'none';
+        }
+
+        function selectStoryChoice(choice) {
+            addPoints(10);
+            showPointsAnimation('+10 Points!');
+            alert(`You chose option ${choice}. Great thinking! You earned 10 eco points.`);
+        }
+
+        function nextChapter() {
+            addPoints(25);
+            showPointsAnimation('+25 Points!');
+            alert('Chapter completed! You earned 25 eco points. Next chapter loading...');
+        }
+
+        function previousChapter() {
+            alert('Going back to previous chapter...');
+        }
+
+        // Functions for activity management
+        function startActivity(activityId) {
+            const modal = document.getElementById('activity-modal');
+            const contentBody = document.getElementById('activity-content-body');
+            
+            if (activityData[activityId]) {
+                contentBody.innerHTML = activityData[activityId].content;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeActivityModal() {
+            document.getElementById('activity-modal').style.display = 'none';
+        }
+
+        function startEcosystemGame() {
+            alert('Ecosystem Builder Game starting! Drag organisms from the toolkit to build your ecosystem.');
+            // Here you would implement the actual drag-and-drop game logic
+        }
+
+        function calculateFootprint() {
+            const transport = document.getElementById('transport-method').value;
+            const distance = parseFloat(document.getElementById('distance').value) || 0;
+            const acUsage = document.getElementById('ac-usage').checked;
+            const computerUsage = document.getElementById('computer-usage').checked;
+            const dietType = document.getElementById('diet-type').value;
+            
+            let totalEmissions = 0;
+            let breakdown = [];
+            let tips = [];
+            
+            // Transport emissions (kg CO2 per km)
+            const transportEmissions = {
+                'walk': 0,
+                'bus': 0.05,
+                'car': 0.2,
+                'motorbike': 0.1
+            };
+            
+            const transportCO2 = distance * transportEmissions[transport];
+            totalEmissions += transportCO2;
+            breakdown.push(`Transport: ${transportCO2.toFixed(1)} kg CO₂`);
+            
+            if (transport !== 'walk') {
+                tips.push('Consider walking or cycling for short distances');
+            }
+            
+            // Energy usage
+            if (acUsage) {
+                totalEmissions += 3.5;
+                breakdown.push('Air Conditioning: 3.5 kg CO₂');
+                tips.push('Use fans instead of AC when possible');
+            }
+            
+            if (computerUsage) {
+                totalEmissions += 1.2;
+                breakdown.push('Electronics: 1.2 kg CO₂');
+                tips.push('Unplug devices when not in use');
+            }
+            
+            // Diet emissions
+            const dietEmissions = {
+                'vegetarian': 2.5,
+                'mixed': 4.0,
+                'meat-heavy': 6.5
+            };
+            
+            const dietCO2 = dietEmissions[dietType];
+            totalEmissions += dietCO2;
+            breakdown.push(`Diet: ${dietCO2} kg CO₂`);
+            
+            if (dietType === 'meat-heavy') {
+                tips.push('Try having one meat-free day per week');
+            }
+            
+            // Display results
+            document.getElementById('total-emissions').textContent = totalEmissions.toFixed(1) + ' kg';
+            document.getElementById('footprint-bar').style.width = Math.min((totalEmissions / 15) * 100, 100) + '%';
+            
+            const breakdownHTML = breakdown.map(item => `<div class="small text-muted">${item}</div>`).join('');
+            document.getElementById('footprint-breakdown').innerHTML = breakdownHTML;
+            
+            const tipsHTML = tips.map(tip => `<li class="small"><i class="fas fa-leaf text-success me-1"></i>${tip}</li>`).join('');
+            document.getElementById('reduction-tips').innerHTML = tipsHTML;
+            
+            document.getElementById('footprint-results').style.display = 'block';
+            
+            // Award points for calculating footprint
+            addPoints(20);
+            showPointsAnimation('+20 Points!');
+        }
+
+        // Quiz functions
+        function startQuiz(quizType) {
+            if (!quizData[quizType]) return;
+            
+            currentQuiz = quizData[quizType];
+            currentQuestionIndex = 0;
+            quizScore = 0;
+            correctAnswers = 0;
+            
+            document.getElementById('quiz-container').style.display = 'block';
+            document.getElementById('quiz-results').style.display = 'none';
+            
+            // Hide quiz category cards
+            const categoryCards = document.querySelectorAll('.quiz-category-card');
+            categoryCards.forEach(card => card.style.display = 'none');
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (!currentQuiz || currentQuestionIndex >= currentQuiz.questions.length) {
+                showQuizResults();
+                return;
+            }
+            
+            const question = currentQuiz.questions[currentQuestionIndex];
+            
+            document.getElementById('quiz-title').textContent = currentQuiz.title;
+            document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1}/${currentQuiz.questions.length}`;
+            document.getElementById('current-points').textContent = `Points: ${quizScore}`;
+            document.getElementById('question-text').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Reset hint
+            document.getElementById('hint-box').classList.remove('show');
+            document.getElementById('hint-text').textContent = 'Click here for a hint!';
+            document.getElementById('next-question-btn').style.display = 'none';
+        }
+
+        function selectAnswer(selectedIndex) {
+            const question = currentQuiz.questions[currentQuestionIndex];
+            const options = document.querySelectorAll('.quiz-option');
+            
+            // Disable all options
+            options.forEach(option => option.onclick = null);
+            
+            // Show correct/incorrect styling
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Update score
+            if (selectedIndex === question.correct) {
+                quizScore += 10;
+                correctAnswers++;
+                addPoints(10);
+                showPointsAnimation('+10 Points!');
+            }
+            
+            // Show next question button
+            document.getElementById('next-question-btn').style.display = 'block';
+            document.getElementById('current-points').textContent = `Points: ${quizScore}`;
+        }
+
+        function showHint() {
+            const question = currentQuiz.questions[currentQuestionIndex];
+            const hintBox = document.getElementById('hint-box');
+            const hintText = document.getElementById('hint-text');
+            
+            hintText.textContent = question.hint;
+            hintBox.classList.add('show');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('quiz-results').style.display = 'block';
+            
+            const accuracy = Math.round((correctAnswers / currentQuiz.questions.length) * 100);
+            
+            document.getElementById('final-score').textContent = quizScore;
+            document.getElementById('correct-answers').textContent = `${correctAnswers}/${currentQuiz.questions.length}`;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            // Update stats
+            updateQuizStats();
+        }
+
+        function resetQuiz() {
+            document.getElementById('quiz-results').style.display = 'none';
+            
+            // Show quiz category cards again
+            const categoryCards = document.querySelectorAll('.quiz-category-card');
+            categoryCards.forEach(card => card.style.display = 'block');
+            
+            currentQuiz = null;
+        }
+
+        function updateQuizStats() {
+            // Update total points
+            document.getElementById('total-points').textContent = userPoints;
+            
+            // Update quizzes completed (this would normally be stored in a database)
+            const currentCompleted = parseInt(document.getElementById('quizzes-completed').textContent);
+            document.getElementById('quizzes-completed').textContent = currentCompleted + 1;
+        }
+
+        // Action logging functions
+        function logAction(actionType) {
+            const actions = {
+                'plant-tree': { points: 100, message: 'Tree planted! You earned 100 eco points!' },
+                'recycle': { points: 25, message: 'Waste recycled! You earned 25 eco points!' },
+                'eco-transport': { points: 15, message: 'Eco transport used! You earned 15 eco points!' },
+                'save-energy': { points: 10, message: 'Energy saved! You earned 10 eco points!' }
+            };
+            
+            if (actions[actionType]) {
+                addPoints(actions[actionType].points);
+                showPointsAnimation(`+${actions[actionType].points} Points!`);
+                alert(actions[actionType].message);
+            }
+        }
+
+        // Utility functions
+        function addPoints(points) {
+            userPoints += points;
+            document.getElementById('eco-points').textContent = userPoints;
+            
+            // Update progress circle (example calculation)
+            const progressPercent = Math.min(Math.floor((userPoints / 2000) * 100), 100);
+            document.getElementById('progress-percentage').textContent = progressPercent + '%';
+            const progressCircle = document.querySelector('.progress-circle');
+            progressCircle.style.setProperty('--progress', progressPercent);
+        }
+
+        function showPointsAnimation(text) {
+            const animation = document.createElement('div');
+            animation.className = 'points-animation';
+            animation.textContent = text;
+            document.body.appendChild(animation);
+            
+            setTimeout(() => {
+                document.body.removeChild(animation);
+            }, 2000);
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('EcoLearn Hub initialized successfully!');
+            
+            // Add some example organism styling
+            const style = document.createElement('style');
+            style.textContent = `
+                .organism-item {
+                    background: #f8f9fa;
+                    border: 2px solid #e9ecef;
+                    border-radius: 10px;
+                    padding: 10px;
+                    margin: 5px 0;
+                    cursor: grab;
+                    transition: all 0.3s ease;
+                }
+                
+                .organism-item:hover {
+                    background: #e3f2fd;
+                    border-color: #2196f3;
+                    transform: translateY(-2px);
+                }
+                
+                .organism-item:active {
+                    cursor: grabbing;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
