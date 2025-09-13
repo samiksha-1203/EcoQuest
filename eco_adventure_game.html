@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoQuest AR - Save the Planet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 30%, #228B22 100%);
+            overflow: hidden;
+        }
+
+        .ar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 255, 0.1);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .score-panel, .health-panel, .level-panel {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-world {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .character {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(45deg, #4CAF50, #81C784);
+            border-radius: 50% 50% 0 0;
+            z-index: 6;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .character::before {
+            content: '🌱';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+        }
+
+        .character::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 10px;
+            right: 10px;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+        }
+
+        .environmental-element {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 4;
+        }
+
+        .environmental-element:hover {
+            transform: scale(1.1);
+        }
+
+        .tree {
+            width: 60px;
+            height: 100px;
+            background: linear-gradient(to top, #8B4513 70%, #228B22 70%);
+            border-radius: 0 0 50% 50%;
+        }
+
+        .tree::before {
+            content: '🌳';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px;
+        }
+
+        .pollution {
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #666, #333);
+            border-radius: 50%;
+            animation: pollute 2s infinite;
+        }
+
+        .pollution::before {
+            content: '💨';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+        }
+
+        .recycling-bin {
+            width: 45px;
+            height: 60px;
+            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            border-radius: 5px 5px 0 0;
+        }
+
+        .recycling-bin::before {
+            content: '♻️';
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 25px;
+        }
+
+        .water-source {
+            width: 70px;
+            height: 40px;
+            background: radial-gradient(circle, #1E88E5, #0D47A1);
+            border-radius: 50%;
+            animation: ripple 1.5s infinite;
+        }
+
+        .water-source::before {
+            content: '💧';
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 25px;
+        }
+
+        @keyframes pollute {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes ripple {
+            0% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(30, 136, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0); }
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #FFD700;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle-float 2s ease-out forwards;
+            z-index: 7;
+        }
+
+        @keyframes particle-float {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(0);
+            }
+        }
+
+        .quest-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            z-index: 15;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .quest-modal h3 {
+            margin-bottom: 15px;
+            color: #FFD700;
+            text-align: center;
+        }
+
+        .quest-modal p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .quest-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            z-index: 10;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            animation: float-cloud 15s infinite linear;
+        }
+
+        .cloud:before {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+        }
+
+        .cloud1 {
+            width: 80px;
+            height: 30px;
+            top: 10%;
+            left: -100px;
+        }
+
+        .cloud1:before {
+            width: 50px;
+            height: 30px;
+            top: -15px;
+            left: 10px;
+        }
+
+        .cloud2 {
+            width: 60px;
+            height: 25px;
+            top: 5%;
+            left: -80px;
+            animation-delay: -5s;
+        }
+
+        .cloud2:before {
+            width: 40px;
+            height: 25px;
+            top: -12px;
+            left: 15px;
+        }
+
+        @keyframes float-cloud {
+            0% { left: -100px; }
+            100% { left: calc(100% + 100px); }
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 20;
+            transform: translateX(300px);
+            transition: transform 0.5s ease;
+        }
+
+        .achievement-popup.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="ar-overlay"></div>
+        
+        <!-- Floating clouds -->
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+
+        <!-- HUD -->
+        <div class="hud">
+            <div class="score-panel">
+                <div>🌟 Score: <span id="score">0</span></div>
+            </div>
+            <div class="level-panel">
+                <div>🎯 Level: <span id="level">1</span></div>
+                <div>🌍 Earth Health: <span id="earth-health">100</span>%</div>
+            </div>
+            <div class="health-panel">
+                <div>⚡ Energy: <span id="energy">100</span></div>
+            </div>
+        </div>
+
+        <!-- Game World -->
+        <div class="game-world" id="gameWorld">
+            <!-- Player Character -->
+            <div class="character" id="character"></div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel" id="infoPanel">
+            Click on environmental elements to interact! 🌱
+        </div>
+
+        <!-- Achievement Popup -->
+        <div class="achievement-popup" id="achievementPopup">
+            🏆 Achievement Unlocked!
+        </div>
+    </div>
+
+    <!-- Quest Modal -->
+    <div class="quest-modal" id="questModal" style="display: none;">
+        <h3 id="questTitle">Environmental Challenge!</h3>
+        <p id="questDescription">Help save the environment!</p>
+        <div class="quest-buttons">
+            <button class="btn btn-primary" id="questAccept">Accept Mission</button>
+            <button class="btn btn-secondary" id="questDecline">Learn More</button>
+        </div>
+    </div>
+
+    <script>
+        class EcoQuestGame {
+            constructor() {
+                this.score = 0;
+                this.level = 1;
+                this.earthHealth = 100;
+                this.energy = 100;
+                this.elements = [];
+                this.currentQuest = null;
+                this.achievements = [];
+                
+                this.init();
+                this.spawnElements();
+                this.startGameLoop();
+            }
+
+            init() {
+                this.scoreElement = document.getElementById('score');
+                this.levelElement = document.getElementById('level');
+                this.earthHealthElement = document.getElementById('earth-health');
+                this.energyElement = document.getElementById('energy');
+                this.gameWorld = document.getElementById('gameWorld');
+                this.infoPanel = document.getElementById('infoPanel');
+                this.questModal = document.getElementById('questModal');
+                this.achievementPopup = document.getElementById('achievementPopup');
+                this.character = document.getElementById('character');
+
+                // Event listeners
+                document.getElementById('questAccept').addEventListener('click', () => this.acceptQuest());
+                document.getElementById('questDecline').addEventListener('click', () => this.learnMore());
+                
+                // Character movement
+                this.gameWorld.addEventListener('click', (e) => this.moveCharacter(e));
+            }
+
+            spawnElements() {
+                const elementTypes = [
+                    { type: 'tree', count: 8, points: 10, health: 5 },
+                    { type: 'pollution', count: 6, points: 15, health: -10 },
+                    { type: 'recycling-bin', count: 4, points: 20, health: 8 },
+                    { type: 'water-source', count: 3, points: 25, health: 12 }
+                ];
+
+                elementTypes.forEach(elementType => {
+                    for (let i = 0; i < elementType.count; i++) {
+                        this.createElement(elementType);
+                    }
+                });
+            }
+
+            createElement(elementType) {
+                const element = document.createElement('div');
+                element.className = `environmental-element ${elementType.type}`;
+                element.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+                element.style.top = Math.random() * (window.innerHeight - 200) + 100 + 'px';
+                
+                element.addEventListener('click', () => this.interactWithElement(element, elementType));
+                
+                this.gameWorld.appendChild(element);
+                this.elements.push({ element, type: elementType.type, data: elementType });
+            }
+
+            interactWithElement(element, elementType) {
+                const quests = this.getQuestForElement(elementType.type);
+                this.showQuest(quests, element, elementType);
+            }
+
+            getQuestForElement(type) {
+                const questData = {
+                    tree: {
+                        title: "🌳 Forest Guardian",
+                        description: "Trees absorb CO2 and produce oxygen! One mature tree can absorb 48 pounds of CO2 per year. Plant and protect trees to combat climate change!",
+                        fact: "A single tree can produce enough oxygen for two people for a whole year!"
+                    },
+                    pollution: {
+                        title: "💨 Pollution Fighter",
+                        description: "Air pollution causes 7 million deaths annually worldwide. By reducing emissions and using clean energy, we can save lives and protect our planet!",
+                        fact: "Electric vehicles produce 60% fewer emissions than gas cars over their lifetime!"
+                    },
+                    'recycling-bin': {
+                        title: "♻️ Recycling Hero",
+                        description: "Recycling one aluminum can saves enough energy to power a TV for 3 hours! Proper waste management reduces landfill waste by 75%.",
+                        fact: "It takes 450 years for a plastic bottle to decompose in a landfill!"
+                    },
+                    'water-source': {
+                        title: "💧 Water Protector",
+                        description: "Clean water is essential for all life. 2 billion people lack access to safe drinking water. Protect watersheds and reduce water pollution!",
+                        fact: "A dripping faucet can waste over 3,000 gallons of water per year!"
+                    }
+                };
+                
+                return questData[type];
+            }
+
+            showQuest(quest, element, elementType) {
+                this.currentQuest = { quest, element, elementType };
+                
+                document.getElementById('questTitle').textContent = quest.title;
+                document.getElementById('questDescription').innerHTML = quest.description + 
+                    '<br><br><strong>🧠 Did you know?</strong> ' + quest.fact;
+                
+                this.questModal.style.display = 'block';
+            }
+
+            acceptQuest() {
+                if (this.currentQuest) {
+                    const { element, elementType } = this.currentQuest;
+                    
+                    // Update game state
+                    this.score += elementType.points;
+                    this.earthHealth = Math.max(0, Math.min(100, this.earthHealth + elementType.health));
+                    this.energy = Math.max(0, Math.min(100, this.energy - 5));
+                    
+                    // Visual effects
+                    this.createParticles(element);
+                    element.style.opacity = '0.5';
+                    element.style.pointerEvents = 'none';
+                    
+                    // Update display
+                    this.updateDisplay();
+                    this.checkAchievements();
+                    this.checkLevelUp();
+                    
+                    // Show achievement if earned
+                    if (this.score % 100 === 0) {
+                        this.showAchievement(`Environmental Warrior Level ${Math.floor(this.score / 100)}!`);
+                    }
+                    
+                    this.questModal.style.display = 'none';
+                    this.infoPanel.textContent = `Great job! +${elementType.points} points! 🌟`;
+                    
+                    setTimeout(() => {
+                        this.infoPanel.textContent = 'Click on environmental elements to interact! 🌱';
+                    }, 3000);
+                }
+            }
+
+            learnMore() {
+                if (this.currentQuest) {
+                    const additionalInfo = {
+                        tree: "🌳 Trees also prevent soil erosion, provide habitat for wildlife, and cool urban areas by up to 10°F!",
+                        pollution: "💨 You can help by using public transport, walking, biking, or choosing renewable energy sources!",
+                        'recycling-bin': "♻️ The recycling symbol was created in 1970 and represents the continuous cycle of reuse!",
+                        'water-source': "💧 Simple actions like shorter showers and fixing leaks can save thousands of gallons yearly!"
+                    };
+                    
+                    const info = additionalInfo[this.currentQuest.elementType.type];
+                    alert(info);
+                }
+            }
+
+            createParticles(element) {
+                const rect = element.getBoundingClientRect();
+                for (let i = 0; i < 10; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = (rect.left + rect.width / 2) + 'px';
+                    particle.style.top = (rect.top + rect.height / 2) + 'px';
+                    particle.style.animationDelay = (i * 0.1) + 's';
+                    
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), 2000);
+                }
+            }
+
+            updateDisplay() {
+                this.scoreElement.textContent = this.score;
+                this.levelElement.textContent = this.level;
+                this.earthHealthElement.textContent = this.earthHealth;
+                this.energyElement.textContent = this.energy;
+            }
+
+            checkLevelUp() {
+                const newLevel = Math.floor(this.score / 150) + 1;
+                if (newLevel > this.level) {
+                    this.level = newLevel;
+                    this.energy = 100; // Restore energy on level up
+                    this.showAchievement(`Level Up! Welcome to Level ${this.level}!`);
+                    this.spawnNewElements();
+                }
+            }
+
+            spawnNewElements() {
+                // Add more challenging elements as level increases
+                if (this.level > 1) {
+                    this.createElement({ type: 'pollution', points: 20 + (this.level * 5), health: -8 });
+                    this.createElement({ type: 'recycling-bin', points: 25 + (this.level * 5), health: 10 });
+                }
+            }
+
+            checkAchievements() {
+                const achievements = [
+                    { score: 50, title: "Eco Newbie" },
+                    { score: 150, title: "Green Warrior" },
+                    { score: 300, title: "Planet Protector" },
+                    { score: 500, title: "Environmental Champion" },
+                    { score: 1000, title: "Earth Guardian Master" }
+                ];
+
+                achievements.forEach(achievement => {
+                    if (this.score >= achievement.score && !this.achievements.includes(achievement.title)) {
+                        this.achievements.push(achievement.title);
+                        this.showAchievement(achievement.title);
+                    }
+                });
+            }
+
+            showAchievement(title) {
+                this.achievementPopup.textContent = `🏆 ${title}`;
+                this.achievementPopup.classList.add('show');
+                
+                setTimeout(() => {
+                    this.achievementPopup.classList.remove('show');
+                }, 3000);
+            }
+
+            moveCharacter(e) {
+                const rect = this.gameWorld.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const character = this.character;
+                
+                character.style.left = (x - 30) + 'px';
+                character.style.transform = 'translateX(0) scale(1.1)';
+                
+                setTimeout(() => {
+                    character.style.transform = 'translateX(0) scale(1)';
+                }, 200);
+            }
+
+            startGameLoop() {
+                setInterval(() => {
+                    // Gradually decrease earth health if no action
+                    if (this.earthHealth > 0) {
+                        this.earthHealth = Math.max(0, this.earthHealth - 0.1);
+                        this.updateDisplay();
+                    }
+                    
+                    // Regenerate energy slowly
+                    if (this.energy < 100) {
+                        this.energy = Math.min(100, this.energy + 0.5);
+                        this.updateDisplay();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Start the game when page loads
+        window.addEventListener('load', () => {
+            new EcoQuestGame();
+        });
+    </script>
+</body>
+</html>

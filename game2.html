@@ -22,7 +22,7 @@
 <!-- Start Screen -->
 <div id="startScreen">
   <h1>EcoQuest: Green Treasure Hunt</h1>
-  <p>Find green treasures 🌳, avoid hazards ⚠, and answer questions to earn points!</p>
+  <p>Find green treasures 🌳, avoid hazards ⚠️, and answer questions to earn points!</p>
   <p>You have 60 seconds and 100% ecosystem health. Good luck!</p>
   <button id="startBtn">Start Game</button>
 </div>
@@ -97,7 +97,7 @@ startBtn.addEventListener('click', () => {
 function startTimer(){
     timerInterval = setInterval(()=>{
         timeLeft--;
-        document.getElementById('timer').innerText = Time Left: ${timeLeft}s;
+        document.getElementById('timer').innerText = `Time Left: ${timeLeft}s`;
         if(timeLeft<=0){
             clearInterval(timerInterval);
             endGame();
@@ -114,7 +114,7 @@ function clickCell(cell){
         showQuestion(cell, index);
     } else if(hazards.has(index)){
         cell.style.background = '#b71c1c';
-        cell.innerText = '⚠';
+        cell.innerText = '⚠️';
         score -= 5;
         ecosystem = Math.max(0, ecosystem-10);
         document.getElementById('info').innerText = "Hazard encountered! Ecosystem health -10%";
@@ -125,8 +125,8 @@ function clickCell(cell){
         document.getElementById('info').innerText = "No treasure here!";
     }
 
-    document.getElementById('score').innerText = Score: ${score};
-    document.getElementById('ecosystem').innerText = Ecosystem Health: ${ecosystem}%;
+    document.getElementById('score').innerText = `Score: ${score}`;
+    document.getElementById('ecosystem').innerText = `Ecosystem Health: ${ecosystem}%`;
 
     if(foundTreasures.size === treasuresCount || ecosystem <=0){
         clearInterval(timerInterval);
@@ -138,7 +138,7 @@ function clickCell(cell){
 function showQuestion(cell, index){
     const q = questions[Math.floor(Math.random()*questions.length)];
     const panel = document.getElementById('questionPanel');
-    panel.innerHTML = <p>${q.q}</p>;
+    panel.innerHTML = `<p>${q.q}</p>`;
     q.opts.forEach((opt,i)=>{
         const btn = document.createElement('button');
         btn.innerText = opt;
@@ -166,8 +166,8 @@ function answerQuestion(selected, correct, cell, index){
     cell.innerText = '🌳';
     foundTreasures.add(index);
 
-    document.getElementById('score').innerText = Score: ${score};
-    document.getElementById('ecosystem').innerText = Ecosystem Health: ${ecosystem}%;
+    document.getElementById('score').innerText = `Score: ${score}`;
+    document.getElementById('ecosystem').innerText = `Ecosystem Health: ${ecosystem}%`;
 
     renderGrid();
 }
@@ -176,7 +176,7 @@ function answerQuestion(selected, correct, cell, index){
 function endGame(){
     document.querySelectorAll('.cell').forEach(c=>c.style.pointerEvents='none');
     document.getElementById('questionPanel').innerHTML = '';
-    let msg = Game Over!\nFinal Score: ${score}\nEcosystem Health: ${ecosystem}%;
+    let msg = `Game Over!\nFinal Score: ${score}\nEcosystem Health: ${ecosystem}%`;
     document.getElementById('info').innerText = msg;
 }
 </script>

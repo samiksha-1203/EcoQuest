@@ -108,14 +108,16 @@
             border-radius: 20px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.3);
             max-width: 600px;
+            width: 90%; /* makes it responsive */
             text-align: center;
             animation: slideUp 0.5s ease;
         }
 
-        @keyframes slideUp {
-            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
-        }
+            @keyframes slideUp {
+                from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
+
 
         .challenge-title {
             color: #2c5530;
@@ -319,6 +321,17 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
+
+        @keyframes ripple {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(20);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -381,7 +394,7 @@
                     forest: ['🌳', '🦋', '🐿', '🌸', '🍄'],
                     ocean: ['🐠', '🐙', '🐬', '🌊', '🐚'],
                     city: ['🏭', '🚗', '🏢', '💨', '⚡'],
-                    arctic: ['🐧', '❄', '🗻', '🐻‍❄', '🧊']
+                    arctic: ['🐧', '❄', '🗻', '🐻‍❄️', '🧊']
                 };
                 
                 this.challenges = [
@@ -493,7 +506,7 @@
 
             updateScene() {
                 const scene = document.getElementById('gameScene');
-                scene.className = scene ${this.currentScene}-scene;
+                scene.className = `scene ${this.currentScene}-scene`;
             }
 
             spawnARObjects() {
@@ -554,7 +567,7 @@
                 
                 challenge.options.forEach((option, index) => {
                     const btn = document.createElement('button');
-                    btn.className = option-btn ${option.type}-choice;
+                    btn.className = `option-btn ${option.type}-choice`;
                     btn.textContent = option.text;
                     btn.onclick = () => this.makeChoice(option);
                     optionsContainer.appendChild(btn);
@@ -563,7 +576,7 @@
                 document.getElementById('challengePanel').style.display = 'block';
             }
 
-   makeChoice(choice) {
+            makeChoice(choice) {
                 this.ecoScore += choice.score;
                 this.planetHealth += choice.health;
                 
@@ -575,11 +588,11 @@
                 
                 let message = '';
                 if (choice.type === 'good') {
-                    message = Great choice! +${choice.score} eco points!;
+                    message = `Great choice! +${choice.score} eco points!`;
                 } else if (choice.type === 'bad') {
-                    message = Poor choice. Planet health decreased.;
+                    message = 'Poor choice. Planet health decreased.';
                 } else {
-                    message = Okay choice. Could be better!;
+                    message = 'Okay choice. Could be better!';
                 }
                 
                 this.showAchievement(message);
@@ -605,7 +618,8 @@
                 document.getElementById('ecoFill').style.width = (this.ecoScore / this.maxEcoScore * 100) + '%';
                 document.getElementById('progressFill').style.width = (this.challengeIndex / this.challenges.length * 100) + '%';
             }
-showAchievement(text) {
+
+            showAchievement(text) {
                 const achievement = document.createElement('div');
                 achievement.className = 'achievement';
                 achievement.textContent = text;
@@ -640,7 +654,8 @@ showAchievement(text) {
                     this.resetGame();
                 }, 4000);
             }
-resetGame() {
+
+            resetGame() {
                 this.level = 1;
                 this.planetHealth = 100;
                 this.ecoScore = 0;
@@ -669,7 +684,8 @@ resetGame() {
                 createRipple(e.pageX, e.pageY);
             }
         });
-function createRipple(x, y) {
+
+        function createRipple(x, y) {
             const ripple = document.createElement('div');
             ripple.style.position = 'absolute';
             ripple.style.left = x + 'px';
@@ -687,22 +703,6 @@ function createRipple(x, y) {
             
             setTimeout(() => ripple.remove(), 600);
         }
-
-        // Add ripple animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes ripple {
-                0% {
-                    transform: translate(-50%, -50%) scale(1);
-                    opacity: 0.3;
-                }
-                100% {
-                    transform: translate(-50%, -50%) scale(20);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
